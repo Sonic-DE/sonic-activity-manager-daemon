@@ -107,6 +107,8 @@ void ResourceLinking::UnlinkResourceFromActivity(QString initiatingAgent, QStrin
 
     QSqlQuery *query = nullptr;
 
+    // Favorites callers may pass a bare desktop ID for an applications: link.
+    // Match that alias in SQL without changing the resource used in notifications.
     if (usedActivity == ":any") {
         Utils::prepare(*resourcesDatabase(),
                        unlinkResourceFromAllActivitiesQuery,
@@ -125,18 +127,12 @@ void ResourceLinking::UnlinkResourceFromActivity(QString initiatingAgent, QStrin
                                       "usedActivity      = COALESCE(:usedActivity     , '') AND "
                                       "initiatingAgent   = COALESCE(:initiatingAgent  , '') AND "
                                       "(targettedResource = COALESCE(:targettedResource, '') OR "
-                                      "(initiatingAgent = 'org.kde.plasma.favorites.applications'"
-                                      "AND targettedResource =  'applications:' || COALESCE(:targettedResource, '')))"));
+                                      "(initiatingAgent = 'org.kde.plasma.favorites.applications' "
+                                      "AND targettedResource = 'applications:' || COALESCE(:targettedResource, '')))"));
         query = unlinkResourceFromActivityQuery.get();
     }
 
     DATABASE_TRANSACTION(*resourcesDatabase());
-    // BUG 385814, some existing entries don't have the applications:
-    // prefix, so we remove it and check in the sql if they match
-    // TODO Remove when we can expect all users to have a fresher install than 5.18
-    if (initiatingAgent == QLatin1String("org.kde.plasma.favorites.applications")) {
-        targettedResource = targettedResource.remove(QLatin1String("applications:"));
-    }
     Utils::exec(*resourcesDatabase(),
                 Utils::FailOnError,
                 *query,
