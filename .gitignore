@@ -22,3 +22,4 @@ CMakeLists.txt.user*
 .idea
 /cmake-build*
 .cache
+.ccls-cache
