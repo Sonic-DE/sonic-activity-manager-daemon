@@ -1,5 +1,8 @@
 # vim:set softtabstop=3 shiftwidth=3 tabstop=3 expandtab:
 
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 cmake_minimum_required(VERSION 3.16)
 
 set(PROJECT_VERSION "6.7.2")
@@ -93,6 +96,8 @@ add_subdirectory (src)
 # add clang-format target for all our real source files
 file (GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
+file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h)
+list(FILTER ALL_CLANG_FORMAT_SOURCE_FILES EXCLUDE REGEX ".*\\.ccls-cache/.*")
 kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)
 
 ecm_qt_install_logging_categories(
